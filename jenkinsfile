@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+    stages {
+        stage('Code Analysis') {
+            steps {
+               withSonarQubeEnv('sonarqube') {
+                  sh "mvn sonar:sonar"  
+               }
+            }   
+        }
+        stage('Build Artifact') {
+            steps {
+                sh 'mvn -f pom.xml clean package'
+            }
+        }
+        stage('Build Docker Image') {
+             steps {
+                 sh "docker build -t cloudhight/pet-adoption-image-usteam1:latest ."
+             }
+         }
+        stage('Run Docker Image') {
+            steps {
+                sh "docker run -it -d --name testappContainer -p 8080:8080 cloudhight/pet-adoption-image-usteam1:latest"
+            }
+        }
+    }
+}
